@@ -10,6 +10,8 @@ green() { echo -e "\e[1;32m$1\033[0m"; }
 yellow() { echo -e "\e[1;33m$1\033[0m"; }
 purple() { echo -e "\e[1;35m$1\033[0m"; }
 reading() { read -p "$(red "$1")" "$2"; }
+VERSION_USER="v1.22.0"
+VERSION_ADMIN="v1.7.3"
 yellow "开始检测系统状态"
 port_list=$(devil port list)
 tcp_ports=$(echo "$port_list" | grep -c "tcp")
@@ -143,13 +145,13 @@ build() {
   git clone https://github.com/nezhahq/nezha.git >/dev/null 2>&1
   cd nezha/cmd/dashboard
   yellow "克隆项目成功"
-  wget https://github.com/nezhahq/admin-frontend/releases/download/v1.7.3/dist.zip >/dev/null 2>&1
+  wget https://github.com/nezhahq/admin-frontend/releases/download/${VERSION_ADMIN}/dist.zip >/dev/null 2>&1
   unzip dist.zip >/dev/null 2>&1
   rm -rf admin-dist
   mv dist admin-dist
   rm -rf dist.zip
 
-  wget https://github.com/hamster1963/nezha-dash-v1/releases/download/v1.20.0/dist.zip >/dev/null 2>&1
+  wget https://github.com/hamster1963/nezha-dash-v1/releases/download/${VERSION_USER}/dist.zip >/dev/null 2>&1
   unzip dist.zip >/dev/null 2>&1
   rm -rf user-dist
   mv dist user-dist
