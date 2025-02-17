@@ -132,6 +132,7 @@ green "创建网站成功"
 devil www options $domain sslonly on  >/dev/null 2>&1
 #devil ssl www add $available_ip le le nezha.${USERNAME}.serv00.net 
 green "强制HTTPS设置成功"
+green "安装面板"
 mkdir ~/dev >/dev/null 2>&1
 cd ~/dev
 build() {
@@ -170,26 +171,85 @@ build() {
   green "编译成功"
 }
 target_path="${HOME}/dev/nezha/main"
-if [ -e "$target_path" ]; then
-  red "文件已存在。是否需要重新编译？(yes/no)"
-  
-  # 等待用户输入
-  read -r user_input
-  case $user_input in
-    yes|y|Y)
-      build  # 调用编译函数
+downloadurl="https://jzprzpuxlsb.serv00.net/main"  # 假设的二进制下载地址
+
+# 判断文件是否存在
+
+prompt_user_choice() {
+  local prompt_message="$1"
+  local choices=("$@")  # 所有选项
+  echo "$prompt_message"
+  for choice in "${choices[@]:1}"; do  # 从第一个选项开始
+    echo "$choice"
+  done
+  read -r user_choice
+ # echo "$user_choice"
+}
+
+# 执行下载二进制文件
+download_binary() {
+ yellow "正在下载..."
+ mkdir -p ${HOME}/dev/nezha/
+ wget -O "$target_path" "$downloadurl" >/dev/null 2>&1
+ if [ $? -eq 0 ]; then
+    green "下载成功！"
+  else
+    red "二进制文件下载失败，请检查下载地址或网络连接。"
+  fi
+}
+
+# 执行编译
+compile() {
+  yellow "正在执行编译命令..."
+  build  # 调用编译函数
+}
+
+# 文件存在时的操作
+handle_existing_file() {
+  prompt_user_choice "文件存在，请选择" \
+    "(1) 重新编译" "(2) 重新下载" "(3) 跳过"
+
+  case $user_choice in
+    1)
+      compile  # 执行编译
       ;;
-    no|n|N)
-      yellow "已取消重新编译。"
+    2)
+      download_binary  # 执行下载
+      ;;
+    3)
+      yellow "跳过操作，继续执行下一步。"
       ;;
     *)
-      yellow "无效输入，已取消重新编译。"
+      yellow "无效输入，已跳过操作。"
       ;;
   esac
+}
+
+# 文件不存在时的操作
+handle_non_existing_file() {
+  prompt_user_choice "请选择：" \
+    "(1) 开始编译" "(2) 直接下载"
+
+  case $user_choice in
+    1)
+      compile  # 执行编译
+      ;;
+    2)
+      download_binary  # 执行下载
+      ;;
+    *)
+      yellow "无效输入，已取消操作。"
+      ;;
+  esac
+}
+
+# 主程序逻辑
+if [ -e "$target_path" ]; then
+  handle_existing_file  # 文件已存在，执行相关操作
 else
-  yellow "可执行文件不存在，正在执行编译命令..."
-  build  # 调用编译函数
+  handle_non_existing_file  # 文件不存在，执行相关操作
 fi
+
 
 pkill main
 green "进行下一步工作"
@@ -197,7 +257,7 @@ sleep 2
 mkdir ~/nezha >/dev/null 2>&1
 cp ~/dev/nezha/main ~/nezha/main
 cd ~/nezha
-
+chmod +x main
 nohup ./main >/dev/null 2>&1 &
 sleep 10
 
