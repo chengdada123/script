@@ -114,7 +114,7 @@ login_cf() {
     local api_endpoint=""
     
 
-    api_endpoint="https://api.cf.us20.hana.ondemand.com"
+    api_endpoint="https://api.cf.us20.hana.ondemand.com"  #改成你自己的
      
  
     
