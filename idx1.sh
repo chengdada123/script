@@ -12,7 +12,7 @@ chmod +x main.sh
 printf '3\n1\n8\n\n\n\n\n200G\n10240\n8\n\n\n\n\n2\n1\n' | bash ./main.sh &
 
 
-sleep 20
+
 printf '3\n3\n1\n' | bash ./main.sh
 wget -O vm.sh https://raw.githubusercontent.com/chengdada123/script/refs/heads/main/vm.sh
 chmod +x vm.sh
