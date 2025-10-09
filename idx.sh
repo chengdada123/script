@@ -92,10 +92,5 @@ chmod +x vm.sh
 cd ~/vps
 wget -O vm.sh https://raw.githubusercontent.com/chengdada123/script/refs/heads/main/vm.sh
 chmod +x vm.sh
+printf '2\n1\n' | bash ./vm.sh
 
-# 背景运行，同时保证输入传递
-(
-  printf '2\n1\n' | bash ./vm.sh
-) &
-
-echo "🎉 所有步骤完成！虚拟机准备就绪。"
