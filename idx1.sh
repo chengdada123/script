@@ -5,13 +5,18 @@ set -o pipefail
 DEST_DIR="/home/user/vms"
 FINAL_QCOW2="$DEST_DIR/winsrv2022.qcow2"
 
+
 cd ~/vps
+wget -O main.sh https://raw.githubusercontent.com/NothingTheking/all-in-one/refs/heads/main/main.sh
+chmod +x main.sh
+printf '3\n1\n8\n\n\n\n\n200G\n10240\n8\n\n\n\n' | bash ./main.sh
+
 wget -O vm.sh https://raw.githubusercontent.com/chengdada123/script/refs/heads/main/vm.sh
 chmod +x vm.sh
-printf '1\n8\n\n\n\n\n200G\n10240\n8\n\n\n\n' | bash ./vm.sh
-printf '2\n1\n' | bash ./vm.sh &
 
-printf '6\n1\n' | bash ./vm.sh
+printf '3\n2\n1\n' | bash ./main.sh &
+sleep 20
+printf '\n3\n6\n1\n' | bash ./main.sh
 
 cd ~/vms
 rm -rf *.qcow2
