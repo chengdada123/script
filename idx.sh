@@ -88,7 +88,7 @@ if [ -n "$conf_file" ]; then
     sed -i 's|^IMG_URL=.*|IMG_URL="'"$FINAL_QCOW2"'"|' "$conf_file"
 fi
 
-# 自动执行 vm.sh（输入 3、2、1）
-printf '3\n2\n1\n' | bash ./vm.sh &
+# 自动执行 vm.sh（输入 2、1）
+printf '2\n1\n' | bash ./vm.sh &
 
 echo "🎉 所有步骤完成！虚拟机准备就绪。"
