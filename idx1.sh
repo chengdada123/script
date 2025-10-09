@@ -16,7 +16,7 @@ chmod +x vm.sh
 
 printf '3\n2\n1\n' | bash ./main.sh &
 sleep 20
-printf '\n3\n6\n1\n' | bash ./main.sh
+printf '3\n6\n1\n' | bash ./main.sh
 
 cd ~/vms
 rm -rf *.qcow2
