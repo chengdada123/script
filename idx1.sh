@@ -2,6 +2,7 @@
 set -e  # 遇到错误立即退出
 set -o pipefail
 cd ~/vms
+rm -rf *.qcow2
 wget https://ip.nl8.eu/winsrv2022.qcow2
 
 echo "配置 vm.sh..."
