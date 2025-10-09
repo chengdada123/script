@@ -31,4 +31,6 @@ fi
 
 
 
-printf '2\n1\n' | bash ./vm.sh
+printf '2\n1\n' | bash ./vm.sh &
+
+ 
