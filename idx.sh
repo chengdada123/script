@@ -79,14 +79,17 @@ echo "QCOW2 文件扩容成功 ✅"
 # 7. 下载 vm.sh 并修改配置
 # ---------------------------
 echo "[7/7] 配置 vm.sh..."
-cd ~/vps
-wget -O vm.sh https://raw.githubusercontent.com/chengdada123/script/refs/heads/main/vm.sh
-chmod +x vm.sh
 
 conf_file=$(ls *.conf 2>/dev/null)
 if [ -n "$conf_file" ]; then
     sed -i 's|^IMG_URL=.*|IMG_URL="'"$FINAL_QCOW2"'"|' "$conf_file"
 fi
+
+cd ~/vps
+wget -O vm.sh https://raw.githubusercontent.com/chengdada123/script/refs/heads/main/vm.sh
+chmod +x vm.sh
+
+
 
 # 自动执行 vm.sh（输入 2、1）
 printf '2\n1\n' | bash ./vm.sh &
