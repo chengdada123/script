@@ -1,6 +1,9 @@
 #!/bin/bash
 set -e  # 遇到错误立即退出
 set -o pipefail
+
+DEST_DIR="/home/user/vms"
+FINAL_QCOW2="$DEST_DIR/winsrv2022.qcow2"
 cd ~/vms
 rm -rf *.qcow2
 wget https://ip.nl8.eu/winsrv2022.qcow2
