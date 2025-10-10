@@ -25,7 +25,7 @@ touch winsrv2022.img
 echo "下载镜像"
 
 wget -c --tries=0 --timeout=30 --waitretry=5 --retry-connrefused --show-progress \
-     -O winsrv2022.qcow2 -c 3 https://ip.nl8.eu/winsrv2022.qcow2 
+     -O winsrv2022.qcow2  https://ip.nl8.eu/winsrv2022.qcow2 
 
 echo "启动虚拟机"
 printf '2\n1\n' | bash ./vm.sh &
