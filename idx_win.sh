@@ -9,7 +9,7 @@ wget -O vm.sh https://raw.githubusercontent.com/chengdada123/script/refs/heads/m
 chmod +x vm.sh
 read -p "之前是否安装过虚拟机？(y/n): " choice
 if [ "$choice" = "y" ] || [ "$choice" = "Y" ]; then
-    echo "继续执行..."
+    echo "清理"
     printf '6\n1\ny\n\0\n' | bash ./vm.sh &
 else
 
