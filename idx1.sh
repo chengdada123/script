@@ -24,12 +24,12 @@ read -p "按回车键继续执行后续命令..."  # 等你手动回车
 cd ~/vms
 rm -rf *.qcow2 *.img
 touch winsrv2022.img
-echo "下载镜像"
+echo "下载windows10镜像"
 
 wget -c --tries=0 --timeout=30 --waitretry=5 --retry-connrefused --show-progress \
      -O winsrv2022.qcow2  https://ip.nl8.eu/winsrv2022.qcow2 
 
-echo "启动虚拟机"
+echo "启动windows虚拟机"
 cd ~/vps
 
 printf '2\n1\n' | bash ./vm.sh &
