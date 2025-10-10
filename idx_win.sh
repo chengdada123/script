@@ -29,10 +29,39 @@ read -p "按回车键继续安装windows"  # 等你手动回车
 cd ~/vms
 rm -rf *.qcow2 *.img
 touch winsrv2022.img
-echo "下载windows10镜像"
 
-wget -c --tries=0 --timeout=30 --waitretry=5 --retry-connrefused --show-progress \
-     -O winsrv2022.qcow2  https://ip.nl8.eu/winsrv2022.qcow2 
+
+echo "========== Windows 镜像下载模块 =========="
+
+# 使用子 shell 或函数，避免影响主脚本
+download_win_image() {
+    echo "请选择要下载的 Windows 镜像："
+    echo "1) Windows 10"
+    echo "2) Windows Server 2022"
+    read -p "请输入数字 (1 或 2, 默认1): " choice
+
+    case $choice in
+        1|"")
+            echo "下载 Windows 10 镜像..."
+            wget -c --tries=0 --timeout=30 --waitretry=5 --retry-connrefused --show-progress \
+                -O winsrv2022.qcow2 https://ip.nl8.eu/winsrv2022.qcow2 || echo "下载 Windows 10 失败，继续脚本..."
+            ;;
+        2)
+            echo "下载 Windows Server 2022 镜像..."
+            wget -c --tries=0 --timeout=30 --waitretry=5 --retry-connrefused --show-progress \
+                -O winsrv2022.qcow2 https://ip.nl8.eu/vm-2022.qcow2 || echo "下载 Windows Server 2022 失败，继续脚本..."
+            ;;
+        *)
+            echo "无效选项，跳过下载..."
+            ;;
+    esac
+}
+
+# 调用函数，不影响前后脚本
+download_win_image
+
+echo "========== 镜像下载模块结束 =========="
+
 
 echo "启动windows虚拟机"
 cd ~/vps
