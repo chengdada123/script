@@ -13,4 +13,4 @@ read -p "按回车键继续执行后续命令..."  # 等你手动回车
 echo "创建debian虚拟机，完成后请按回车键"
 printf '3\n1\n8\nwinsrv2022\ndebian\nroot\nvps888\n200G\n10240\n8\n\n\n\n\n2\n1\n' | bash ./main.sh &
 read -p "按回车键继续执行后续命令..."  # 等你手动回车
-echo "创建debian虚拟机成功，用户名：root 密码：vps888"
+echo "创建debian虚拟机成功，用户名：root 密码：vps888 你可以在当前页面通过 ssh -p 2222 root@localhost 登录"
