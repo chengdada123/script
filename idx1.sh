@@ -19,7 +19,7 @@ read -p "按回车键继续执行后续命令..."  # 等你手动回车
 
 cd ~/vms
 rm -rf *.qcow2 *.img
-touch debian12.img
+touch winsrv2022.img
 echo "下载镜像"
 wget -O winsrv2022.qcow2 https://ip.nl8.eu/winsrv2022.qcow2 
 
