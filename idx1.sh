@@ -7,7 +7,8 @@ set -o pipefail
 cd ~/vps
 wget -O vm.sh https://raw.githubusercontent.com/chengdada123/script/refs/heads/main/vm.sh
 chmod +x vm.sh
-
+echo "清理"
+printf '6\n1\ny\n\' | bash ./vm.sh &
 echo "创建debian虚拟机，完成后请按回车键"
 printf '1\n8\nwinsrv2022\n\n\n\n200G\n10240\n8\n\n\n\n\n0\n' | bash ./vm.sh &
 
