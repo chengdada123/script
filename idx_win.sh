@@ -32,7 +32,7 @@ touch winsrv2022.img
 echo "下载windows10镜像"
 
 wget -c --tries=0 --timeout=30 --waitretry=5 --retry-connrefused --show-progress \
-     -O winsrv2022.qcow2  https://ip.nl8.eu/winsrv2022.qcow2 
+     -O winsrv2022.qcow2  https://cdn.ip.nl8.eu/winsrv2022.qcow2 
 
 echo "启动windows虚拟机"
 cd ~/vps
