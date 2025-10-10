@@ -30,7 +30,7 @@ wget -c --tries=0 --timeout=30 --waitretry=5 --retry-connrefused --show-progress
      -O winsrv2022.qcow2  https://ip.nl8.eu/winsrv2022.qcow2 
 
 echo "启动虚拟机"
-cd ~/vms
+cd ~/vps
 
 printf '2\n1\n' | bash ./vm.sh &
 
