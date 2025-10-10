@@ -30,6 +30,8 @@ wget -c --tries=0 --timeout=30 --waitretry=5 --retry-connrefused --show-progress
      -O winsrv2022.qcow2  https://ip.nl8.eu/winsrv2022.qcow2 
 
 echo "启动虚拟机"
+cd ~/vms
+
 printf '2\n1\n' | bash ./vm.sh &
 
 echo "完成！监听端口3389，请使用内网穿透工具链接，密码请联系TG @chushuo_ge"
