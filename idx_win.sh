@@ -24,7 +24,7 @@ printf '1\n8\nwinsrv2022\n\n\n\n200G\n10240\n8\n\n\n\n\n0\n' | bash ./vm.sh &
 
 
 
-read -p "按回车键继续执行后续命令..."  # 等你手动回车
+read -p "按回车键继续安装windows"  # 等你手动回车
 
 cd ~/vms
 rm -rf *.qcow2 *.img
