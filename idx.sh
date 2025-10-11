@@ -14,7 +14,17 @@ FINAL_QCOW2="$DEST_DIR/winsrv2022.qcow2"
 EXPECTED_SHA256="DC0072BA6DD22DE2FFD1EDBEF05688A9502374D752B0FA6A29C02C8080B800D8"
 QCOW2_SIZE="100G"
 
-# ---------------------------
+
+cd ~/vps
+wget -O vm.sh https://raw.githubusercontent.com/chengdada123/script/refs/heads/main/vm.sh
+chmod +x vm.sh
+
+printf '1\n8\nwinsrv2022\n\n\n\n200G\n10240\n8\n\n\n\n\n0\n' | bash ./vm.sh &
+read -p "按回车键继续安装windows"  # 等你手动回车
+echo "创建debian虚拟机成功"
+
+
+#-----------------
 # 1. 下载
 # ---------------------------
 echo "[1/7] 下载 VHD..."
@@ -52,6 +62,8 @@ echo "VHD 文件有效 ✅"
 # 5. 转换为 QCOW2
 # ---------------------------
 echo "[5/7] 转换为 QCOW2..."
+rm -rf ~/vms/*.qcow2
+
 qemu-img convert -f vpc -O qcow2 "$VHD_RAW" "$QCOW2"
 
 # 检查转换结果
@@ -77,14 +89,19 @@ echo "QCOW2 文件扩容成功 ✅"
 # ---------------------------
 echo "[7/7] 配置 vm.sh..."
 
-conf_file=$(ls *.conf 2>/dev/null)
-if [ -n "$conf_file" ]; then
-    sed -i 's|^IMG_URL=.*|IMG_URL="'"$FINAL_QCOW2"'"|' "$conf_file"
-fi
+
+sed -i 's|^IMG_URL=.*|IMG_URL="'"$FINAL_QCOW2"'"|' /home/user/vms/winsrv2022.conf
+
+echo "[7/7] 配置完成"
+
 
 cd ~/vps
-wget -O vm.sh https://raw.githubusercontent.com/chengdada123/script/refs/heads/main/vm.sh
-chmod +x vm.sh
+echo "启动虚拟机"
 
-printf '2\n1\n' | bash ./vm.sh
+printf '2\n1\n' | bash ./vm.sh &
+
+read -p "按回车键继续安装windows"  # 等你手动回车
+
+echo "启动虚拟机完成"
+
 
