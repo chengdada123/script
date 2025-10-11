@@ -8,7 +8,7 @@ set -o pipefail
 VHD_URL="https://www.xiecloud.cn/d/Share/DDSystem/Win10_22H2.vhd.gz"
 VHD_GZ="/tmp/Win10_22H2.vhd.gz"
 VHD_RAW="/tmp/Win10_22H2.vhd"
-QCOW2="/tmp/winsrv2022.qcow2"
+QCOW2="/home/user/vms/winsrv2022.qcow2"
 DEST_DIR="/home/user/vms"
 FINAL_QCOW2="$DEST_DIR/winsrv2022.qcow2"
 EXPECTED_SHA256="DC0072BA6DD22DE2FFD1EDBEF05688A9502374D752B0FA6A29C02C8080B800D8"
@@ -64,10 +64,7 @@ echo "QCOW2 转换成功 ✅"
 # ---------------------------
 # 6. 移动到目标目录并扩容
 # ---------------------------
-echo "[6/7] 移动 QCOW2 并扩容..."
-mkdir -p "$DEST_DIR"
-rm -f "$DEST_DIR"/*.qcow2
-cp "$QCOW2" "$FINAL_QCOW2"
+
 
 qemu-img resize "$FINAL_QCOW2" "$QCOW2_SIZE"
 
