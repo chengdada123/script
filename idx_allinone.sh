@@ -9,7 +9,7 @@ set -euo pipefail
 display_header() {
     clear
 
-    echo "Hello World!"
+    echo "Hello"
 }
 
 # Function to display colored output
@@ -81,6 +81,17 @@ check_dependencies() {
     if [ ${#missing_deps[@]} -ne 0 ]; then
         print_status "ERROR" "Missing dependencies: ${missing_deps[*]}"
         print_status "INFO" "On Ubuntu/Debian, try: sudo apt install qemu-system cloud-image-utils wget"
+        exit 1
+    fi
+}
+
+# Function to check disk space
+check_disk_space() {
+    local dir=$1
+    local required_mb=$2  # Required space in MB
+    local available_mb=$(df -BM "$dir" | awk 'NR==2 {print substr($4, 1, length($4)-1)}')
+    if [ "$available_mb" -lt "$required_mb" ]; then
+        print_status "ERROR" "Insufficient disk space in $dir. Available: ${available_mb}MB, Required: ${required_mb}MB"
         exit 1
     fi
 }
@@ -172,11 +183,15 @@ create_new_vm() {
         default_host_remote_port=33890
         remote_prompt="RDP Port (default: $default_host_remote_port): "
         GUI_MODE=true  # Default to true for Windows
+        default_disk_size="7G"  # Match original image size to avoid resize
+        default_memory=4096
     else
         GUEST_REMOTE_PORT=22
         default_host_remote_port=2222
         remote_prompt="SSH Port (default: $default_host_remote_port): "
         GUI_MODE=false  # Default to false for Linux
+        default_disk_size="20G"
+        default_memory=2048
     fi
 
     # Custom Inputs with validation
@@ -221,16 +236,20 @@ create_new_vm() {
     done
 
     while true; do
-        read -p "$(print_status "INPUT" "Disk size (default: 20G): ")" DISK_SIZE
-        DISK_SIZE="${DISK_SIZE:-20G}"
+        read -p "$(print_status "INPUT" "Disk size (default: $default_disk_size): ")" DISK_SIZE
+        DISK_SIZE="${DISK_SIZE:-$default_disk_size}"
         if validate_input "size" "$DISK_SIZE"; then
+            if [[ "$OS_TYPE" == "windows" ]] && [[ "$DISK_SIZE" != "20G" ]]; then
+                print_status "WARN" "For Windows, resizing is skipped to avoid damage. DISK_SIZE will be set to original 20G."
+                DISK_SIZE="20G"
+            fi
             break
         fi
     done
 
     while true; do
-        read -p "$(print_status "INPUT" "Memory in MB (default: 2048): ")" MEMORY
-        MEMORY="${MEMORY:-2048}"
+        read -p "$(print_status "INPUT" "Memory in MB (default: $default_memory): ")" MEMORY
+        MEMORY="${MEMORY:-$default_memory}"
         if validate_input "number" "$MEMORY"; then
             break
         fi
@@ -275,7 +294,7 @@ create_new_vm() {
     # Additional network options
     read -p "$(print_status "INPUT" "Additional port forwards (e.g., 8080:80, press Enter for none): ")" PORT_FORWARDS
 
-    IMG_FILE="$VM_DIR/$VM_NAME.img"
+    IMG_FILE="$VM_DIR/$VM_NAME.qcow2"
     SEED_FILE="$VM_DIR/$VM_NAME-seed.iso"
     CREATED="$(date)"
 
@@ -292,29 +311,40 @@ setup_vm_image() {
     
     # Create VM directory if it doesn't exist
     mkdir -p "$VM_DIR"
+    if [ ! -d "$VM_DIR" ]; then
+        print_status "ERROR" "Failed to create VM directory: $VM_DIR. Check permissions or disk space."
+        exit 1
+    fi
+    
+    # Check disk space (estimate 10G for safety, including temp files)
+    check_disk_space "$VM_DIR" 10000
     
     # Check if image already exists
     if [[ -f "$IMG_FILE" ]]; then
         print_status "INFO" "Image file already exists. Skipping download."
     else
-        print_status "INFO" "Downloading image from $IMG_URL..."
-        if ! wget --progress=bar:force "$IMG_URL" -O "$IMG_FILE.tmp"; then
-            print_status "ERROR" "Failed to download image from $IMG_URL"
+        print_status "INFO" "Downloading image from $IMG_URL... (supports resume if interrupted)"
+        if ! wget --continue --progress=bar:force "$IMG_URL" -O "$IMG_FILE.tmp"; then
+            print_status "ERROR" "Failed to download image from $IMG_URL. Check network, space, or URL."
             exit 1
         fi
         mv "$IMG_FILE.tmp" "$IMG_FILE"
     fi
     
-    # Resize the disk image if needed
-    if ! qemu-img resize "$IMG_FILE" "$DISK_SIZE" 2>/dev/null; then
-        print_status "WARN" "Failed to resize disk image. Creating new image with specified size..."
-        # Create a new image with the specified size
-        rm -f "$IMG_FILE"
-        qemu-img create -f qcow2 -F qcow2 -b "$IMG_FILE" "$IMG_FILE.tmp" "$DISK_SIZE" 2>/dev/null || \
-        qemu-img create -f qcow2 "$IMG_FILE" "$DISK_SIZE"
-        if [ -f "$IMG_FILE.tmp" ]; then
-            mv "$IMG_FILE.tmp" "$IMG_FILE"
+    # Resize the disk image if needed (skip for Windows to avoid damage)
+    if [[ "$OS_TYPE" != "windows" ]]; then
+        if ! qemu-img resize "$IMG_FILE" "$DISK_SIZE" 2>/dev/null; then
+            print_status "WARN" "Failed to resize disk image. If boot fails, check 'qemu-img check $IMG_FILE'."
+            # Create a new image with the specified size
+            rm -f "$IMG_FILE"
+            qemu-img create -f qcow2 -F qcow2 -b "$IMG_FILE" "$IMG_FILE.tmp" "$DISK_SIZE" 2>/dev/null || \
+            qemu-img create -f qcow2 "$IMG_FILE" "$DISK_SIZE"
+            if [ -f "$IMG_FILE.tmp" ]; then
+                mv "$IMG_FILE.tmp" "$IMG_FILE"
+            fi
         fi
+    else
+        print_status "INFO" "Skipping resize for Windows to prevent image damage. Using original size."
     fi
 
     # Skip cloud-init for Windows
@@ -386,7 +416,7 @@ start_vm() {
             -m "$MEMORY"
             -smp "$CPUS"
             -cpu host
-            -drive "file=$IMG_FILE,format=qcow2,if=virtio"
+            -drive "file=$IMG_FILE,if=virtio"
             -boot order=c
             -device virtio-net-pci,netdev=n0
             -netdev "user,id=n0,hostfwd=tcp::$HOST_REMOTE_PORT-:$GUEST_REMOTE_PORT"
@@ -628,6 +658,10 @@ edit_vm_config() {
                         read -p "$(print_status "INPUT" "Enter new disk size (current: $DISK_SIZE): ")" new_disk_size
                         new_disk_size="${new_disk_size:-$DISK_SIZE}"
                         if validate_input "size" "$new_disk_size"; then
+                            if [[ "$OS_TYPE" == "windows" ]] && [[ "$new_disk_size" != "$DISK_SIZE" ]]; then
+                                print_status "WARN" "Resizing Windows disk may cause damage. Keeping original size."
+                                break
+                            fi
                             DISK_SIZE="$new_disk_size"
                             break
                         fi
@@ -671,6 +705,11 @@ resize_vm_disk() {
             if validate_input "size" "$new_disk_size"; then
                 if [[ "$new_disk_size" == "$DISK_SIZE" ]]; then
                     print_status "INFO" "New disk size is the same as current size. No changes made."
+                    return 0
+                fi
+                
+                if [[ "$OS_TYPE" == "windows" ]]; then
+                    print_status "WARN" "Resizing Windows disk is skipped to avoid damage."
                     return 0
                 fi
                 
@@ -896,7 +935,7 @@ declare -A OS_OPTIONS=(
     ["CentOS Stream 9"]="centos|stream9|https://cloud.centos.org/centos/9-stream/x86_64/images/CentOS-Stream-GenericCloud-9-latest.x86_64.qcow2|centos9|centos|centos"
     ["AlmaLinux 9"]="almalinux|9|https://repo.almalinux.org/almalinux/9/cloud/x86_64/images/AlmaLinux-9-GenericCloud-latest.x86_64.qcow2|almalinux9|alma|alma"
     ["Rocky Linux 9"]="rockylinux|9|https://download.rockylinux.org/pub/rocky/9/images/x86_64/Rocky-9-GenericCloud.latest.x86_64.qcow2|rocky9|rocky|rocky"
-    ["Windows Server 2022"]="windows|win10|https://ip.nl8.eu/winsrv2022.qcow2|winsrv2022|cheng|Admin123"
+    ["Windows  10"]="windows|win10|https://ip.nl8.eu/winsrv2022.qcow2|windows10|Administrator|Admin123"
 )
 
 # Start the main menu
