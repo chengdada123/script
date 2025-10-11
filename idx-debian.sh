@@ -16,11 +16,11 @@ read -p "是否继续？(y/n): " choice
 if [ "$choice" = "y" ] || [ "$choice" = "Y" ]; then
     echo "继续执行..."
     # 在这里写要执行的命令
+
+
+printf '3\n1\n8\nwinsrv2022\ndebian\nroot\nvps888\n200G\n10240\n8\n\n\n\n\n2\n1\n' | bash ./main.sh 
+
 else
     echo "已取消。"
     exit 1
 fi
-
-printf '3\n1\n8\nwinsrv2022\ndebian\nroot\nvps888\n200G\n10240\n8\n\n\n\n\n2\n1\n' | bash ./main.sh 
-
-
