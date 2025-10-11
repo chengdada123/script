@@ -936,6 +936,7 @@ declare -A OS_OPTIONS=(
     ["AlmaLinux 9"]="almalinux|9|https://repo.almalinux.org/almalinux/9/cloud/x86_64/images/AlmaLinux-9-GenericCloud-latest.x86_64.qcow2|almalinux9|alma|alma"
     ["Rocky Linux 9"]="rockylinux|9|https://download.rockylinux.org/pub/rocky/9/images/x86_64/Rocky-9-GenericCloud.latest.x86_64.qcow2|rocky9|rocky|rocky"
     ["Windows  10"]="windows|win10|https://ip.nl8.eu/winsrv2022.qcow2|windows10|Administrator|Admin123"
+    ["Windows server 2022"]="windows|winserver2022|https://ip.nl8.eu/vm-2022.qcow2|winserver2022|Administrator|Admin123"
 )
 
 # Start the main menu
