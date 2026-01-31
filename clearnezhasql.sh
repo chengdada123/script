@@ -1,31 +1,40 @@
-#!/bin/bash
-db_file1="/opt/nezha/dashboard/data/sqlite.db"
-db_file2="/opt/nezha/dashboard_v0/data/sqlite.db"
+#!/usr/bin/env bash
+set -euo pipefail
 
-if [ ! -f "$db_file1" ]; then
-    echo "数据库文件 $db_file1 不存在"
-    exit 1
-fi
+# ========= 配置 =========
+DB1="/opt/nezha/dashboard/data/sqlite.db"
+DB2="/opt/nezha/dashboard_v0/data/sqlite.db"
 
+TG_API="https://api.telegram.org/XXXXXXXXXX/sendMessage"
+TG_CHAT_ID="XXXXXXXXXX"
 
-if [ ! -f "$db_file2" ]; then
-    echo "数据库文件 $db_file2 不存在"
-    exit 1
-fi
+# ========= 函数 =========
+clean_if_exists() {
+    local db="$1"
+    local table="$2"
+    local msg="$3"
 
-sqlite3 "$db_file1" <<EOF
-DELETE FROM service_histories;
-VACUUM; -- 清理数据库以释放空间
+    if [[ ! -f "$db" ]]; then
+        echo "⚠️ 跳过，不存在数据库: $db"
+        return 0
+    fi
+
+    sqlite3 "$db" <<EOF
+DELETE FROM $table;
+VACUUM;
 EOF
-echo "已成功清空 service_histories 表的数据"
-curl -s -X POST https://api.telegram.org/XXXXXXXXXXXXX/sendMessage \
- -F chat_id='XXXXXXX' -F text='[已成功清空 service_histories 表的数据] 哪吒面板清理完成NZ'
-sqlite3 "$db_file2" <<EOF
-DELETE FROM monitor_histories;
-VACUUM; -- 清理数据库以释放空间
-EOF
 
+    echo "✅ 已清空 $table ($db)"
+    curl -s -X POST "$TG_API" \
+        -F chat_id="$TG_CHAT_ID" \
+        -F text="$msg" >/dev/null
+}
 
-echo "已成功清空 monitor_histories 表的数据"
-curl -s -X POST https://api.telegram.org/XXXXXXXXXX/sendMessage \
- -F chat_id='XXXXXXXXXX' -F text='[已成功清空 monitor_histories 表的数据] 哪吒面板清理完成Server Status'
+# ========= 执行 =========
+clean_if_exists "$DB1" "service_histories" \
+"[service_histories] 哪吒面板清理完成 NZ"
+
+clean_if_exists "$DB2" "monitor_histories" \
+"[monitor_histories] 哪吒面板清理完成 Server Status"
+
+echo "🎉 清理任务结束"
