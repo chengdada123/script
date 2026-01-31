@@ -32,9 +32,9 @@ EOF
 
 # ========= 执行 =========
 clean_if_exists "$DB1" "service_histories" \
-"[service_histories] 哪吒面板清理完成 NZ"
+"[service_histories] 哪吒面板清理完成V1"
 
 clean_if_exists "$DB2" "monitor_histories" \
-"[monitor_histories] 哪吒面板清理完成 Server Status"
+"[monitor_histories] 哪吒面板清理完成V0"
 
 echo "🎉 清理任务结束"
